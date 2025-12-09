@@ -60,7 +60,7 @@ function StrengthTrainingTracker() {
   const [loading, setLoading] = useState(true);
 
   // ⚠️ VIGTIGT: SKIFT DETTE PASSWORD FØR DU UDGIVER! ⚠️
-  const correctPassword = "minTræning2024";
+  const correctPassword = "2312";
 
   // Tjek om bruger allerede er logget ind
   useEffect(() => {
