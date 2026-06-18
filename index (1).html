@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Styrketræning</title>
+<style>
+  :root {
+    --bg: #14130f;
+    --bg-elevated: #1e1c16;
+    --bg-card: #242018;
+    --border: #322d22;
+    --text: #ece6d8;
+    --text-dim: #9c9484;
+    --accent: #e8801c;
+    --accent-dim: #5a3d1a;
+    --done-bg: #2a2412;
+    --danger: #b5453a;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    height: 100%;
+  }
+
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 18px 40px;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 28px 0 18px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 5;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+  }
+
+  .week-label {
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .week-label .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  .progress-track {
+    margin-top: 14px;
+    height: 6px;
+    border-radius: 4px;
+    background: var(--bg-elevated);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .exercise-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .exercise {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 14px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .exercise.done {
+    background: var(--done-bg);
+    border-color: var(--accent-dim);
+  }
+
+  .checkbox {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: 2px solid var(--text-dim);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .exercise.done .checkbox {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+
+  .checkbox svg {
+    width: 15px;
+    height: 15px;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+  }
+
+  .exercise.done .checkbox svg {
+    opacity: 1;
+  }
+
+  .exercise-name {
+    flex: 1 1 auto;
+    font-size: 16px;
+    font-weight: 500;
+    word-break: break-word;
+  }
+
+  .exercise.done .exercise-name {
+    color: var(--text-dim);
+    text-decoration: line-through;
+    text-decoration-color: var(--accent-dim);
+  }
+
+  .remove-btn {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .remove-btn:active {
+    background: rgba(181, 69, 58, 0.15);
+    color: var(--danger);
+  }
+
+  .empty-state {
+    margin-top: 60px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .add-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 14px 18px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    display: flex;
+    gap: 10px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .add-bar input {
+    flex: 1 1 auto;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 16px;
+    outline: none;
+  }
+
+  .add-bar input::placeholder {
+    color: var(--text-dim);
+  }
+
+  .add-bar input:focus {
+    border-color: var(--accent);
+  }
+
+  .add-btn {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color: #1a1408;
+    font-size: 24px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .add-btn:active {
+    opacity: 0.85;
+  }
+
+  .spacer {
+    height: 90px;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Styrketræning</h1>
+      <div class="week-label">
+        <span class="dot"></span>
+        <span id="weekLabel"></span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </header>
+
+    <div class="exercise-list" id="exerciseList"></div>
+
+    <div class="empty-state" id="emptyState" style="display:none;">
+      Ingen øvelser endnu.<br>Tilføj din første øvelse herunder.
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+
+  <form class="add-bar" id="addForm">
+    <input type="text" id="newExerciseInput" placeholder="Ny øvelse..." autocomplete="off" maxlength="60">
+    <button type="submit" class="add-btn" aria-label="Tilføj øvelse">+</button>
+  </form>
+
+  <script>
+    const STORAGE_KEY = 'styrketraening-data';
+
+    function getISOWeekId(date) {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = (d.getUTCDay() + 6) % 7;
+      d.setUTCDate(d.getUTCDate() - dayNum + 3);
+      const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+      const weekNum = 1 + Math.round(((d - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
+      return `${d.getUTCFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+    }
+
+    function getISOWeekNumber(weekId) {
+      return weekId.split('-W')[1];
+    }
+
+    function loadData() {
+      let raw;
+      try {
+        raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      } catch (e) {
+        raw = null;
+      }
+      if (!raw || !Array.isArray(raw.exercises)) {
+        raw = { exercises: [], currentWeek: getISOWeekId(new Date()) };
+      }
+
+      const thisWeek = getISOWeekId(new Date());
+      if (raw.currentWeek !== thisWeek) {
+        raw.exercises.forEach(ex => ex.done = false);
+        raw.currentWeek = thisWeek;
+        saveData(raw);
+      }
+      return raw;
+    }
+
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    let state = loadData();
+
+    function render() {
+      const list = document.getElementById('exerciseList');
+      const emptyState = document.getElementById('emptyState');
+      const weekLabel = document.getElementById('weekLabel');
+      const progressFill = document.getElementById('progressFill');
+
+      weekLabel.textContent = `Uge ${getISOWeekNumber(state.currentWeek)}`;
+
+      list.innerHTML = '';
+
+      if (state.exercises.length === 0) {
+        emptyState.style.display = 'block';
+      } else {
+        emptyState.style.display = 'none';
+        state.exercises.forEach(ex => {
+          const item = document.createElement('div');
+          item.className = 'exercise' + (ex.done ? ' done' : '');
+
+          const checkbox = document.createElement('button');
+          checkbox.className = 'checkbox';
+          checkbox.setAttribute('aria-label', ex.done ? 'Markér som ikke udført' : 'Markér som udført');
+          checkbox.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#1a1408" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+          checkbox.addEventListener('click', () => toggleDone(ex.id));
+
+          const name = document.createElement('div');
+          name.className = 'exercise-name';
+          name.textContent = ex.name;
+
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'remove-btn';
+          removeBtn.setAttribute('aria-label', 'Fjern øvelse');
+          removeBtn.textContent = '×';
+          removeBtn.addEventListener('click', () => removeExercise(ex.id));
+
+          item.appendChild(checkbox);
+          item.appendChild(name);
+          item.appendChild(removeBtn);
+          list.appendChild(item);
+        });
+      }
+
+      const total = state.exercises.length;
+      const doneCount = state.exercises.filter(ex => ex.done).length;
+      const pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
+      progressFill.style.width = pct + '%';
+    }
+
+    function toggleDone(id) {
+      const ex = state.exercises.find(e => e.id === id);
+      if (ex) {
+        ex.done = !ex.done;
+        saveData(state);
+        render();
+      }
+    }
+
+    function removeExercise(id) {
+      state.exercises = state.exercises.filter(e => e.id !== id);
+      saveData(state);
+      render();
+    }
+
+    function addExercise(name) {
+      const trimmed = name.trim();
+      if (!trimmed) return;
+      state.exercises.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        name: trimmed,
+        done: false
+      });
+      saveData(state);
+      render();
+    }
+
+    document.getElementById('addForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('newExerciseInput');
+      addExercise(input.value);
+      input.value = '';
+      input.focus();
+    });
+
+    // Re-check week on visibility change (e.g. app reopened after being closed over a week boundary)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        state = loadData();
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
