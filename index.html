@@ -3,179 +3,311 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Styrketræning</title>
+<title>Tracker</title>
 <style>
   :root {
-    --bg: #14130f;
-    --bg-elevated: #1e1c16;
-    --bg-card: #242018;
-    --border: #322d22;
-    --text: #ece6d8;
-    --text-dim: #9c9484;
-    --accent: #e8801c;
-    --accent-dim: #5a3d1a;
-    --done-bg: #2a2412;
-    --danger: #b5453a;
+    --bg: #1c1c1e;
+    --bg-elevated: #2c2c2e;
+    --bg-card: #2c2c2e;
+    --border: #3a3a3c;
+    --text: #f5f5f7;
+    --text-dim: #aeaeb2;
+    --accent: #ff9f3c;
+    --accent-dim: #6b3d10;
+    --done-bg: #38301e;
+    --danger: #ff453a;
+    --green: #32d74b;
+    --green-dim: #1a3d22;
+    --blue: #64b5f6;
   }
 
-  * {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   html, body {
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     background: var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     height: 100%;
   }
 
-  body {
+  /* ── TAB BAR ── */
+  .tab-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    display: flex;
     padding-bottom: env(safe-area-inset-bottom);
+    z-index: 20;
   }
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 0 8px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: color 0.15s;
+  }
+  .tab-btn svg { width: 22px; height: 22px; }
+  .tab-btn.active { color: var(--accent); }
+  .tab-btn.active.green-tab { color: var(--green); }
+  .tab-btn.active.blue-tab  { color: var(--blue); }
 
-  .wrap {
+  /* ── PAGES ── */
+  .page {
+    display: none;
     max-width: 480px;
     margin: 0 auto;
-    padding: 0 18px 40px;
+    padding: 0 18px;
+    padding-bottom: calc(130px + env(safe-area-inset-bottom));
     min-height: 100vh;
   }
+  .page.active { display: block; }
 
-  header {
-    padding: 28px 0 18px;
+  /* ── HEADER ── */
+  .page-header {
+    padding: 36px 0 20px;
     position: sticky;
     top: 0;
     background: var(--bg);
     z-index: 5;
   }
-
   h1 {
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 700;
-    letter-spacing: -0.01em;
-    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
   }
-
-  .week-label {
+  .sub-label {
     font-size: 13px;
     color: var(--text-dim);
     display: flex;
     align-items: center;
     gap: 6px;
   }
-
-  .week-label .dot {
-    width: 6px;
-    height: 6px;
+  .sub-label .dot {
+    width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--accent);
     display: inline-block;
+    flex-shrink: 0;
   }
+  .sub-label .dot.green { background: var(--green); }
+  .sub-label .dot.blue  { background: var(--blue); }
 
+  /* ── PROGRESS BAR ── */
   .progress-track {
-    margin-top: 14px;
-    height: 6px;
+    margin-top: 16px;
+    height: 5px;
     border-radius: 4px;
     background: var(--bg-elevated);
     overflow: hidden;
   }
-
   .progress-fill {
     height: 100%;
-    background: var(--accent);
     border-radius: 4px;
     transition: width 0.3s ease;
     width: 0%;
+    background: var(--accent);
   }
+  .progress-fill.green { background: var(--green); }
 
-  .exercise-list {
+  /* ── CARD LIST ── */
+  .card-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 18px;
+    gap: 12px;
+    margin-top: 20px;
   }
 
+  /* ── EXERCISE CARD ── */
   .exercise {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 14px;
-    transition: background 0.15s ease, border-color 0.15s ease;
+    border-radius: 14px;
+    padding: 16px 14px;
+    transition: background 0.15s, border-color 0.15s;
   }
-
-  .exercise.done {
-    background: var(--done-bg);
-    border-color: var(--accent-dim);
-  }
-
+  .exercise.done { background: var(--done-bg); border-color: var(--accent-dim); }
   .checkbox {
     flex: 0 0 auto;
-    width: 26px;
-    height: 26px;
+    width: 28px; height: 28px;
     border-radius: 8px;
-    border: 2px solid var(--text-dim);
+    border: 2px solid var(--border);
     background: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.15s;
   }
-
-  .exercise.done .checkbox {
-    border-color: var(--accent);
-    background: var(--accent);
-  }
-
-  .checkbox svg {
-    width: 15px;
-    height: 15px;
-    opacity: 0;
-    transition: opacity 0.1s ease;
-  }
-
-  .exercise.done .checkbox svg {
-    opacity: 1;
-  }
-
+  .exercise.done .checkbox { border-color: var(--accent); background: var(--accent); }
+  .checkbox svg { width: 15px; height: 15px; opacity: 0; transition: opacity 0.1s; }
+  .exercise.done .checkbox svg { opacity: 1; }
   .exercise-name {
     flex: 1 1 auto;
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 17px; font-weight: 500;
     word-break: break-word;
   }
-
   .exercise.done .exercise-name {
     color: var(--text-dim);
     text-decoration: line-through;
     text-decoration-color: var(--accent-dim);
   }
 
+  /* ── MEAL CARD ── */
+  .meal-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+  }
+  .meal-header { display: flex; align-items: flex-start; gap: 12px; }
+  .meal-time {
+    font-size: 11px; font-weight: 600;
+    color: var(--green);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+  .meal-text {
+    flex: 1 1 auto;
+    font-size: 16px; font-weight: 400;
+    line-height: 1.45; word-break: break-word;
+  }
+
+  /* ── WEIGHT PAGE ── */
+  .weight-top {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .weight-stat {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .weight-stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .weight-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: -0.02em;
+  }
+  .weight-stat-value span {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+  }
+
+  /* goal row */
+  .goal-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 13px 14px;
+  }
+  .goal-icon { font-size: 16px; flex-shrink: 0; }
+  .goal-text { flex: 1; font-size: 14px; color: var(--text-dim); }
+  .goal-text strong { color: #f9c74f; font-size: 16px; }
+  .goal-btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .goal-btn:active { opacity: 0.7; }
+
+  /* SVG chart */
+  .chart-wrap {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 12px 12px;
+    margin-top: 12px;
+  }
+  .chart-wrap svg { display: block; width: 100%; overflow: visible; }
+
+  /* weight log list */
+  .weight-log {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .weight-entry {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 13px 14px;
+  }
+  .weight-entry-date {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.03em;
+    min-width: 50px;
+  }
+  .weight-entry-val {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--blue);
+  }
+  .weight-entry-val span {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-dim);
+  }
+
+  /* ── REMOVE BTN (shared) ── */
   .remove-btn {
     flex: 0 0 auto;
-    width: 30px;
-    height: 30px;
+    width: 30px; height: 30px;
     border-radius: 8px;
     border: none;
     background: transparent;
     color: var(--text-dim);
     font-size: 18px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
   }
+  .remove-btn:active { background: rgba(255,69,58,0.15); color: var(--danger); }
 
-  .remove-btn:active {
-    background: rgba(181, 69, 58, 0.15);
-    color: var(--danger);
-  }
-
+  /* ── EMPTY STATE ── */
   .empty-state {
     margin-top: 60px;
     text-align: center;
@@ -184,225 +316,595 @@
     line-height: 1.6;
   }
 
+  /* ── ADD BAR ── */
   .add-bar {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: calc(54px + env(safe-area-inset-bottom));
+    left: 0; right: 0;
     background: var(--bg);
     border-top: 1px solid var(--border);
-    padding: 14px 18px;
-    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+    padding: 12px 18px;
     display: flex;
     gap: 10px;
     max-width: 480px;
     margin: 0 auto;
+    z-index: 10;
   }
-
   .add-bar input {
     flex: 1 1 auto;
     background: var(--bg-elevated);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
+    border-radius: 12px;
+    padding: 13px 14px;
     color: var(--text);
     font-size: 16px;
     outline: none;
   }
-
-  .add-bar input::placeholder {
-    color: var(--text-dim);
-  }
-
-  .add-bar input:focus {
-    border-color: var(--accent);
-  }
-
+  .add-bar input::placeholder { color: var(--text-dim); }
+  .add-bar input:focus         { border-color: var(--accent); }
+  .add-bar input.green-focus:focus { border-color: var(--green); }
+  .add-bar input.blue-focus:focus  { border-color: var(--blue); }
   .add-btn {
     flex: 0 0 auto;
-    width: 46px;
-    height: 46px;
-    border-radius: 10px;
+    width: 48px; height: 48px;
+    border-radius: 12px;
     border: none;
     background: var(--accent);
     color: #1a1408;
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 26px; font-weight: 500;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
   }
-
-  .add-btn:active {
-    opacity: 0.85;
-  }
-
-  .spacer {
-    height: 90px;
-  }
+  .add-btn.green { background: var(--green); }
+  .add-btn.blue  { background: var(--blue); color: #0a1a2a; }
+  .add-btn:active { opacity: 0.85; }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>Styrketræning</h1>
-      <div class="week-label">
-        <span class="dot"></span>
-        <span id="weekLabel"></span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
-    </header>
 
-    <div class="exercise-list" id="exerciseList"></div>
-
-    <div class="empty-state" id="emptyState" style="display:none;">
-      Ingen øvelser endnu.<br>Tilføj din første øvelse herunder.
+<!-- ══ TRÆNING PAGE ══ -->
+<div class="page active" id="page-training">
+  <div class="page-header">
+    <h1>Styrketræning</h1>
+    <div class="sub-label">
+      <span class="dot"></span>
+      <span id="weekLabel"></span>
     </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="trainingProgress"></div>
+    </div>
+  </div>
+  <div class="card-list" id="exerciseList"></div>
+  <div class="empty-state" id="trainingEmpty" style="display:none;">
+    Ingen øvelser endnu.<br>Tilføj din første øvelse herunder.
+  </div>
+</div>
 
-    <div class="spacer"></div>
+<!-- ══ KOST PAGE ══ -->
+<div class="page" id="page-food">
+  <div class="page-header">
+    <h1>Kost</h1>
+    <div class="sub-label">
+      <span class="dot green"></span>
+      <span id="dayLabel"></span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill green" id="foodProgress"></div>
+    </div>
+  </div>
+  <div class="card-list" id="mealList"></div>
+  <div class="empty-state" id="foodEmpty" style="display:none;">
+    Intet registreret i dag.<br>Tilføj dit første måltid herunder.
+  </div>
+</div>
+
+<!-- ══ VÆGT PAGE ══ -->
+<div class="page" id="page-weight">
+  <div class="page-header">
+    <h1>Vægt</h1>
+    <div class="sub-label">
+      <span class="dot blue"></span>
+      <span id="weightSubLabel">Historik</span>
+    </div>
   </div>
 
-  <form class="add-bar" id="addForm">
-    <input type="text" id="newExerciseInput" placeholder="Ny øvelse..." autocomplete="off" maxlength="60">
-    <button type="submit" class="add-btn" aria-label="Tilføj øvelse">+</button>
-  </form>
+  <div class="weight-top" id="weightStats" style="display:none;">
+    <div class="weight-stat">
+      <div class="weight-stat-label">Seneste</div>
+      <div class="weight-stat-value" id="statLatest">— <span>kg</span></div>
+    </div>
+    <div class="weight-stat">
+      <div class="weight-stat-label">Start</div>
+      <div class="weight-stat-value" id="statFirst">— <span>kg</span></div>
+    </div>
+    <div class="weight-stat">
+      <div class="weight-stat-label">Ændring</div>
+      <div class="weight-stat-value" id="statDiff">—</div>
+    </div>
+  </div>
 
-  <script>
-    const STORAGE_KEY = 'styrketraening-data';
+  <div class="goal-row" id="goalRow">
+    <div class="goal-icon">🎯</div>
+    <div class="goal-text" id="goalText">Intet mål sat endnu</div>
+    <button class="goal-btn" id="goalBtn" onclick="promptGoal()">Sæt mål</button>
+  </div>
 
-    function getISOWeekId(date) {
-      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-      const dayNum = (d.getUTCDay() + 6) % 7;
-      d.setUTCDate(d.getUTCDate() - dayNum + 3);
-      const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
-      const weekNum = 1 + Math.round(((d - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
-      return `${d.getUTCFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+  <div class="chart-wrap" id="chartWrap" style="display:none;">
+    <svg id="weightChart" height="160" viewBox="0 0 300 160" preserveAspectRatio="none"></svg>
+  </div>
+
+  <div class="weight-log" id="weightLog"></div>
+  <div class="empty-state" id="weightEmpty" style="display:none;">
+    Ingen vægt registreret endnu.<br>Tilføj din første vejning herunder.
+  </div>
+</div>
+
+<!-- ══ ADD BARS ══ -->
+<form class="add-bar" id="trainingForm">
+  <input type="text" id="exerciseInput" placeholder="Ny øvelse..." autocomplete="off" maxlength="60">
+  <button type="submit" class="add-btn">+</button>
+</form>
+
+<form class="add-bar" id="foodForm" style="display:none;">
+  <input type="text" id="mealInput" placeholder="Hvad har du spist?" autocomplete="off" maxlength="120" class="green-focus">
+  <button type="submit" class="add-btn green">+</button>
+</form>
+
+<form class="add-bar" id="weightForm" style="display:none;">
+  <input type="number" id="weightInput" placeholder="Vægt i kg" step="0.1" min="20" max="300" class="blue-focus" inputmode="decimal">
+  <button type="submit" class="add-btn blue">+</button>
+</form>
+
+<!-- ══ TAB BAR ══ -->
+<nav class="tab-bar">
+  <button class="tab-btn active" id="tab-training" onclick="switchTab('training')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6.5 6.5h11M6.5 12h11M6.5 17.5h11"/>
+      <circle cx="3.5" cy="6.5" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="17.5" r="1"/>
+    </svg>
+    Træning
+  </button>
+  <button class="tab-btn" id="tab-food" onclick="switchTab('food')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+      <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+      <line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+    </svg>
+    Kost
+  </button>
+  <button class="tab-btn blue-tab" id="tab-weight" onclick="switchTab('weight')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 3h18v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3z"/>
+      <path d="M3 7l2 14h14l2-14"/>
+      <path d="M9 11h6"/>
+    </svg>
+    Vægt
+  </button>
+</nav>
+
+<script>
+  const TRAINING_KEY = 'styrketraening-data';
+  const FOOD_KEY     = 'kost-data';
+  const WEIGHT_KEY   = 'vaegt-data';
+  const GOAL_KEY     = 'vaegt-maal';
+
+  // ── DATE HELPERS ──
+  function getISOWeekId(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = (d.getUTCDay() + 6) % 7;
+    d.setUTCDate(d.getUTCDate() - dayNum + 3);
+    const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+    const weekNum = 1 + Math.round(((d - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
+    return `${d.getUTCFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+  }
+  function getISOWeekNumber(weekId) { return weekId.split('-W')[1]; }
+
+  function getDateId(date) {
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+  }
+
+  function formatTime(isoString) {
+    const d = new Date(isoString);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  function formatDayLabel(dateId) {
+    const [y, m, d] = dateId.split('-').map(Number);
+    const date = new Date(y, m-1, d);
+    const days   = ['søndag','mandag','tirsdag','onsdag','torsdag','fredag','lørdag'];
+    const months = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+    return `${days[date.getDay()]} ${d}. ${months[m-1]}`;
+  }
+
+  function shortDate(dateId) {
+    const [, m, d] = dateId.split('-').map(Number);
+    const months = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+    return `${d}. ${months[m-1]}`;
+  }
+
+  // ── TRAINING ──
+  function loadTraining() {
+    let raw;
+    try { raw = JSON.parse(localStorage.getItem(TRAINING_KEY)); } catch(e) { raw = null; }
+    if (!raw || !Array.isArray(raw.exercises)) raw = { exercises: [], currentWeek: getISOWeekId(new Date()) };
+    const thisWeek = getISOWeekId(new Date());
+    if (raw.currentWeek !== thisWeek) {
+      raw.exercises.forEach(ex => ex.done = false);
+      raw.currentWeek = thisWeek;
+      saveTraining(raw);
     }
+    return raw;
+  }
+  function saveTraining(d) { localStorage.setItem(TRAINING_KEY, JSON.stringify(d)); }
 
-    function getISOWeekNumber(weekId) {
-      return weekId.split('-W')[1];
-    }
+  // ── FOOD ──
+  function loadFood() {
+    let raw;
+    try { raw = JSON.parse(localStorage.getItem(FOOD_KEY)); } catch(e) { raw = null; }
+    if (!raw || !Array.isArray(raw.meals)) raw = { meals: [], currentDay: getDateId(new Date()) };
+    const today = getDateId(new Date());
+    if (raw.currentDay !== today) { raw.meals = []; raw.currentDay = today; saveFood(raw); }
+    return raw;
+  }
+  function saveFood(d) { localStorage.setItem(FOOD_KEY, JSON.stringify(d)); }
 
-    function loadData() {
-      let raw;
-      try {
-        raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      } catch (e) {
-        raw = null;
-      }
-      if (!raw || !Array.isArray(raw.exercises)) {
-        raw = { exercises: [], currentWeek: getISOWeekId(new Date()) };
-      }
+  // ── WEIGHT ──
+  function loadWeight() {
+    let raw;
+    try { raw = JSON.parse(localStorage.getItem(WEIGHT_KEY)); } catch(e) { raw = null; }
+    if (!raw || !Array.isArray(raw.entries)) raw = { entries: [] };
+    return raw;
+  }
+  function saveWeight(d) { localStorage.setItem(WEIGHT_KEY, JSON.stringify(d)); }
 
-      const thisWeek = getISOWeekId(new Date());
-      if (raw.currentWeek !== thisWeek) {
-        raw.exercises.forEach(ex => ex.done = false);
-        raw.currentWeek = thisWeek;
-        saveData(raw);
-      }
-      return raw;
-    }
+  let training = loadTraining();
+  let food     = loadFood();
+  let weight   = loadWeight();
 
-    function saveData(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
+  // ── RENDER TRAINING ──
+  function renderTraining() {
+    const list     = document.getElementById('exerciseList');
+    const empty    = document.getElementById('trainingEmpty');
+    const progress = document.getElementById('trainingProgress');
+    document.getElementById('weekLabel').textContent = `Uge ${getISOWeekNumber(training.currentWeek)}`;
+    list.innerHTML = '';
+    if (training.exercises.length === 0) {
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      training.exercises.forEach(ex => {
+        const item = document.createElement('div');
+        item.className = 'exercise' + (ex.done ? ' done' : '');
 
-    let state = loadData();
+        const cb = document.createElement('button');
+        cb.className = 'checkbox';
+        cb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#1a1408" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        cb.addEventListener('click', () => { const e = training.exercises.find(e => e.id === ex.id); if(e){ e.done = !e.done; saveTraining(training); renderTraining(); }});
 
-    function render() {
-      const list = document.getElementById('exerciseList');
-      const emptyState = document.getElementById('emptyState');
-      const weekLabel = document.getElementById('weekLabel');
-      const progressFill = document.getElementById('progressFill');
+        const name = document.createElement('div');
+        name.className = 'exercise-name';
+        name.textContent = ex.name;
 
-      weekLabel.textContent = `Uge ${getISOWeekNumber(state.currentWeek)}`;
+        const rm = document.createElement('button');
+        rm.className = 'remove-btn';
+        rm.textContent = '×';
+        rm.addEventListener('click', () => { training.exercises = training.exercises.filter(e => e.id !== ex.id); saveTraining(training); renderTraining(); });
 
-      list.innerHTML = '';
-
-      if (state.exercises.length === 0) {
-        emptyState.style.display = 'block';
-      } else {
-        emptyState.style.display = 'none';
-        state.exercises.forEach(ex => {
-          const item = document.createElement('div');
-          item.className = 'exercise' + (ex.done ? ' done' : '');
-
-          const checkbox = document.createElement('button');
-          checkbox.className = 'checkbox';
-          checkbox.setAttribute('aria-label', ex.done ? 'Markér som ikke udført' : 'Markér som udført');
-          checkbox.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#1a1408" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-          checkbox.addEventListener('click', () => toggleDone(ex.id));
-
-          const name = document.createElement('div');
-          name.className = 'exercise-name';
-          name.textContent = ex.name;
-
-          const removeBtn = document.createElement('button');
-          removeBtn.className = 'remove-btn';
-          removeBtn.setAttribute('aria-label', 'Fjern øvelse');
-          removeBtn.textContent = '×';
-          removeBtn.addEventListener('click', () => removeExercise(ex.id));
-
-          item.appendChild(checkbox);
-          item.appendChild(name);
-          item.appendChild(removeBtn);
-          list.appendChild(item);
-        });
-      }
-
-      const total = state.exercises.length;
-      const doneCount = state.exercises.filter(ex => ex.done).length;
-      const pct = total === 0 ? 0 : Math.round((doneCount / total) * 100);
-      progressFill.style.width = pct + '%';
-    }
-
-    function toggleDone(id) {
-      const ex = state.exercises.find(e => e.id === id);
-      if (ex) {
-        ex.done = !ex.done;
-        saveData(state);
-        render();
-      }
-    }
-
-    function removeExercise(id) {
-      state.exercises = state.exercises.filter(e => e.id !== id);
-      saveData(state);
-      render();
-    }
-
-    function addExercise(name) {
-      const trimmed = name.trim();
-      if (!trimmed) return;
-      state.exercises.push({
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-        name: trimmed,
-        done: false
+        item.appendChild(cb); item.appendChild(name); item.appendChild(rm);
+        list.appendChild(item);
       });
-      saveData(state);
-      render();
+    }
+    const total = training.exercises.length;
+    const done  = training.exercises.filter(e => e.done).length;
+    progress.style.width = total === 0 ? '0%' : Math.round((done/total)*100) + '%';
+  }
+
+  // ── RENDER FOOD ──
+  function renderFood() {
+    const list     = document.getElementById('mealList');
+    const empty    = document.getElementById('foodEmpty');
+    const progress = document.getElementById('foodProgress');
+    document.getElementById('dayLabel').textContent = formatDayLabel(food.currentDay);
+    list.innerHTML = '';
+    if (food.meals.length === 0) {
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      food.meals.forEach(meal => {
+        const card = document.createElement('div');
+        card.className = 'meal-card';
+        const hdr = document.createElement('div');
+        hdr.className = 'meal-header';
+        const time = document.createElement('div');
+        time.className = 'meal-time';
+        time.textContent = formatTime(meal.time);
+        const text = document.createElement('div');
+        text.className = 'meal-text';
+        text.textContent = meal.text;
+        const rm = document.createElement('button');
+        rm.className = 'remove-btn';
+        rm.textContent = '×';
+        rm.addEventListener('click', () => { food.meals = food.meals.filter(m => m.id !== meal.id); saveFood(food); renderFood(); });
+        hdr.appendChild(time); hdr.appendChild(text); hdr.appendChild(rm);
+        card.appendChild(hdr);
+        list.appendChild(card);
+      });
+    }
+    progress.style.width = Math.min(100, Math.round((food.meals.length / 6) * 100)) + '%';
+  }
+
+  // ── GOAL WEIGHT ──
+  function loadGoal() {
+    const v = parseFloat(localStorage.getItem(GOAL_KEY));
+    return isNaN(v) ? null : v;
+  }
+  function saveGoal(kg) {
+    if (kg === null) localStorage.removeItem(GOAL_KEY);
+    else localStorage.setItem(GOAL_KEY, kg);
+  }
+  function promptGoal() {
+    const current = loadGoal();
+    const input = prompt('Indtast din målvægt i kg (lad feltet være tomt for at fjerne målet):', current !== null ? current : '');
+    if (input === null) return; // cancelled
+    const val = parseFloat(input.trim());
+    if (input.trim() === '') {
+      saveGoal(null);
+    } else if (!isNaN(val) && val >= 20 && val <= 300) {
+      saveGoal(Math.round(val * 10) / 10);
+    } else if (input.trim() !== '') {
+      alert('Ugyldig vægt. Indtast et tal mellem 20 og 300.');
+      return;
+    }
+    renderWeight();
+  }
+
+  // ── RENDER WEIGHT ──
+  function renderWeight() {
+    const log   = document.getElementById('weightLog');
+    const empty = document.getElementById('weightEmpty');
+    const stats = document.getElementById('weightStats');
+    const chart = document.getElementById('chartWrap');
+    const entries = weight.entries;
+    const goal = loadGoal();
+
+    // ── GOAL ROW ──
+    const goalText = document.getElementById('goalText');
+    const goalBtn  = document.getElementById('goalBtn');
+    if (goal !== null) {
+      goalText.innerHTML = `Mål: <strong>${goal} kg</strong>`;
+      goalBtn.textContent = 'Ændre';
+    } else {
+      goalText.innerHTML = 'Intet mål sat endnu';
+      goalBtn.textContent = 'Sæt mål';
     }
 
-    document.getElementById('addForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = document.getElementById('newExerciseInput');
-      addExercise(input.value);
-      input.value = '';
-      input.focus();
-    });
+    log.innerHTML = '';
 
-    // Re-check week on visibility change (e.g. app reopened after being closed over a week boundary)
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        state = loadData();
-        render();
+    if (entries.length === 0) {
+      empty.style.display = 'block';
+      stats.style.display = 'none';
+      chart.style.display = 'none';
+      return;
+    }
+
+    empty.style.display = 'none';
+    stats.style.display = 'flex';
+
+    const latest = entries[entries.length - 1];
+    const first  = entries[0];
+    const diff   = (latest.kg - first.kg).toFixed(1);
+    const diffSign = diff > 0 ? '+' : '';
+    const diffColor = diff < 0 ? '#32d74b' : diff > 0 ? '#ff453a' : 'var(--text-dim)';
+
+    document.getElementById('statLatest').innerHTML = `${latest.kg} <span>kg</span>`;
+    document.getElementById('statFirst').innerHTML  = `${first.kg} <span>kg</span>`;
+    document.getElementById('statDiff').innerHTML   = `<span style="color:${diffColor};font-size:20px;font-weight:700">${diffSign}${diff}</span> <span style="font-size:12px">kg</span>`;
+
+    if (entries.length >= 2) {
+      chart.style.display = 'block';
+      drawChart(entries, goal);
+    } else {
+      chart.style.display = 'none';
+    }
+
+    [...entries].reverse().forEach(entry => {
+      const row = document.createElement('div');
+      row.className = 'weight-entry';
+      const dateEl = document.createElement('div');
+      dateEl.className = 'weight-entry-date';
+      dateEl.textContent = shortDate(entry.date);
+      const valEl = document.createElement('div');
+      valEl.className = 'weight-entry-val';
+      valEl.innerHTML = `${entry.kg} <span>kg</span>`;
+      const rm = document.createElement('button');
+      rm.className = 'remove-btn';
+      rm.textContent = '×';
+      rm.addEventListener('click', () => {
+        weight.entries = weight.entries.filter(e => e.id !== entry.id);
+        saveWeight(weight);
+        renderWeight();
+      });
+      row.appendChild(dateEl); row.appendChild(valEl); row.appendChild(rm);
+      log.appendChild(row);
+    });
+  }
+
+  function drawChart(entries, goal) {
+    const svg = document.getElementById('weightChart');
+    svg.innerHTML = '';
+
+    const W = 300, H = 160;
+    const padL = 8, padR = 8, padT = 14, padB = 20;
+    const cW = W - padL - padR;
+    const cH = H - padT - padB;
+
+    const vals = entries.map(e => e.kg);
+    const allVals = goal !== null ? [...vals, goal] : vals;
+    const minV = Math.min(...allVals) - 0.5;
+    const maxV = Math.max(...allVals) + 0.5;
+    const range = maxV - minV || 1;
+
+    const toX = i => padL + (i / (entries.length - 1)) * cW;
+    const toY = v => padT + cH - ((v - minV) / range) * cH;
+
+    // defs + gradient
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+    grad.setAttribute('id', 'wgrad');
+    grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0');
+    grad.setAttribute('x2', '0'); grad.setAttribute('y2', '1');
+    const s1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    s1.setAttribute('offset', '0%'); s1.setAttribute('stop-color', '#64b5f6'); s1.setAttribute('stop-opacity', '0.25');
+    const s2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+    s2.setAttribute('offset', '100%'); s2.setAttribute('stop-color', '#64b5f6'); s2.setAttribute('stop-opacity', '0');
+    grad.appendChild(s1); grad.appendChild(s2); defs.appendChild(grad); svg.appendChild(defs);
+
+    // ── GOAL LINE (draw before data so it's behind) ──
+    if (goal !== null) {
+      const gy = toY(goal);
+
+      const goalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      goalLine.setAttribute('x1', padL); goalLine.setAttribute('x2', padL + cW);
+      goalLine.setAttribute('y1', gy);   goalLine.setAttribute('y2', gy);
+      goalLine.setAttribute('stroke', '#f9c74f');
+      goalLine.setAttribute('stroke-width', '1.5');
+      goalLine.setAttribute('stroke-dasharray', '5,4');
+      goalLine.setAttribute('opacity', '0.8');
+      svg.appendChild(goalLine);
+
+      const goalLbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      goalLbl.setAttribute('x', padL + cW - 2);
+      goalLbl.setAttribute('y', gy - 4);
+      goalLbl.setAttribute('text-anchor', 'end');
+      goalLbl.setAttribute('fill', '#f9c74f');
+      goalLbl.setAttribute('font-size', '10');
+      goalLbl.setAttribute('font-family', '-apple-system, sans-serif');
+      goalLbl.setAttribute('font-weight', '600');
+      goalLbl.textContent = `Mål ${goal} kg`;
+      svg.appendChild(goalLbl);
+    }
+
+    // area path
+    let areaD = `M${toX(0)},${toY(vals[0])}`;
+    for (let i = 1; i < vals.length; i++) areaD += ` L${toX(i)},${toY(vals[i])}`;
+    areaD += ` L${toX(vals.length-1)},${padT+cH} L${toX(0)},${padT+cH} Z`;
+    const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    area.setAttribute('d', areaD);
+    area.setAttribute('fill', 'url(#wgrad)');
+    svg.appendChild(area);
+
+    // line path
+    let lineD = `M${toX(0)},${toY(vals[0])}`;
+    for (let i = 1; i < vals.length; i++) lineD += ` L${toX(i)},${toY(vals[i])}`;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    line.setAttribute('d', lineD);
+    line.setAttribute('fill', 'none');
+    line.setAttribute('stroke', '#64b5f6');
+    line.setAttribute('stroke-width', '2');
+    line.setAttribute('stroke-linejoin', 'round');
+    line.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(line);
+
+    // dots + edge labels
+    entries.forEach((entry, i) => {
+      const x = toX(i), y = toY(entry.kg);
+      const isEdge = i === 0 || i === entries.length - 1;
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', x); circle.setAttribute('cy', y);
+      circle.setAttribute('r', isEdge ? '4' : '3');
+      circle.setAttribute('fill', isEdge ? '#64b5f6' : '#2c2c2e');
+      circle.setAttribute('stroke', '#64b5f6');
+      circle.setAttribute('stroke-width', '2');
+      svg.appendChild(circle);
+
+      if (isEdge) {
+        const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        lbl.setAttribute('x', x);
+        lbl.setAttribute('y', y - 7);
+        lbl.setAttribute('text-anchor', 'middle');
+        lbl.setAttribute('fill', '#f5f5f7');
+        lbl.setAttribute('font-size', '11');
+        lbl.setAttribute('font-family', '-apple-system, sans-serif');
+        lbl.setAttribute('font-weight', '600');
+        lbl.textContent = `${entry.kg}`;
+        svg.appendChild(lbl);
       }
     });
 
-    render();
-  </script>
+    // x-axis date labels
+    const mkDateLbl = (x, text, anchor) => {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      el.setAttribute('x', x); el.setAttribute('y', H - 2);
+      el.setAttribute('text-anchor', anchor);
+      el.setAttribute('fill', '#aeaeb2');
+      el.setAttribute('font-size', '10');
+      el.setAttribute('font-family', '-apple-system, sans-serif');
+      el.textContent = text;
+      svg.appendChild(el);
+    };
+    mkDateLbl(toX(0), shortDate(entries[0].date), 'start');
+    mkDateLbl(toX(entries.length - 1), shortDate(entries[entries.length - 1].date), 'end');
+  }
+
+  // ── TABS ──
+  function switchTab(tab) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    ['trainingForm','foodForm','weightForm'].forEach(id => document.getElementById(id).style.display = 'none');
+    document.getElementById('page-' + tab).classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+    if (tab === 'training') document.getElementById('trainingForm').style.display = 'flex';
+    if (tab === 'food')     document.getElementById('foodForm').style.display     = 'flex';
+    if (tab === 'weight')   document.getElementById('weightForm').style.display   = 'flex';
+  }
+
+  // ── FORMS ──
+  document.getElementById('trainingForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = document.getElementById('exerciseInput');
+    const t = input.value.trim(); if (!t) return;
+    training.exercises.push({ id: uid(), name: t, done: false });
+    saveTraining(training); renderTraining();
+    input.value = ''; input.focus();
+  });
+
+  document.getElementById('foodForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = document.getElementById('mealInput');
+    const t = input.value.trim(); if (!t) return;
+    food.meals.push({ id: uid(), text: t, time: new Date().toISOString() });
+    saveFood(food); renderFood();
+    input.value = ''; input.focus();
+  });
+
+  document.getElementById('weightForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = document.getElementById('weightInput');
+    const val = parseFloat(input.value);
+    if (isNaN(val) || val < 20 || val > 300) return;
+    const kg = Math.round(val * 10) / 10;
+    const today = getDateId(new Date());
+    // Replace if same day already exists
+    weight.entries = weight.entries.filter(e => e.date !== today);
+    weight.entries.push({ id: uid(), date: today, kg });
+    weight.entries.sort((a, b) => a.date.localeCompare(b.date));
+    saveWeight(weight); renderWeight();
+    input.value = ''; input.focus();
+  });
+
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      training = loadTraining();
+      food     = loadFood();
+      renderTraining(); renderFood(); renderWeight();
+    }
+  });
+
+  renderTraining();
+  renderFood();
+  renderWeight();
+</script>
 </body>
 </html>
