@@ -51,6 +51,17 @@ const LockIcon = () => (
   </svg>
 );
 
+const DAYS_ORDER = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag'];
+
+const getDayName = (date) => {
+  // getDay(): 0 = søndag ... 6 = lørdag. Vi mapper om så mandag bliver index 0.
+  const jsDay = date.getDay();
+  const index = jsDay === 0 ? 6 : jsDay - 1;
+  return DAYS_ORDER[index];
+};
+
+const sortByNameDa = (a, b) => a.name.localeCompare(b.name, 'da');
+
 function StrengthTrainingTracker() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -147,9 +158,15 @@ function StrengthTrainingTracker() {
   };
 
   const toggleExercise = (id) => {
-    setExercises(exercises.map(ex => 
-      ex.id === id ? { ...ex, completed: !ex.completed } : ex
-    ));
+    setExercises(exercises.map(ex => {
+      if (ex.id !== id) return ex;
+      if (!ex.completed) {
+        // Bliver krydset af nu -> gem hvilken ugedag det skete
+        return { ...ex, completed: true, completedDay: getDayName(new Date()) };
+      }
+      // Krydses op igen -> fjern dag-tilknytningen
+      return { ...ex, completed: false, completedDay: null };
+    }));
   };
 
   const deleteExercise = (id) => {
@@ -158,7 +175,7 @@ function StrengthTrainingTracker() {
 
   const resetWeek = () => {
     if (confirm('Er du sikker på at du vil nulstille alle øvelser?')) {
-      setExercises(exercises.map(ex => ({ ...ex, completed: false })));
+      setExercises(exercises.map(ex => ({ ...ex, completed: false, completedDay: null })));
     }
   };
 
@@ -288,8 +305,21 @@ function StrengthTrainingTracker() {
           {exercises.length === 0 ? (
             <p className="text-gray-500 text-center py-8">Ingen øvelser tilføjet endnu</p>
           ) : (
-            <div className="space-y-2">
-              {exercises.map((exercise) => (
+            (() => {
+              // Del øvelser op: ikke-udførte, og udførte grupperet pr. ugedag
+              const notCompleted = exercises.filter(ex => !ex.completed).sort(sortByNameDa);
+              const byDay = {};
+              DAYS_ORDER.forEach(day => { byDay[day] = []; });
+              exercises
+                .filter(ex => ex.completed)
+                .forEach(ex => {
+                  const day = ex.completedDay || DAYS_ORDER[0];
+                  if (!byDay[day]) byDay[day] = [];
+                  byDay[day].push(ex);
+                });
+              DAYS_ORDER.forEach(day => byDay[day].sort(sortByNameDa));
+
+              const renderExerciseRow = (exercise) => (
                 <div
                   key={exercise.id}
                   className={`flex items-center gap-3 p-4 rounded-lg border-2 transition ${
@@ -320,8 +350,36 @@ function StrengthTrainingTracker() {
                     <TrashIcon />
                   </button>
                 </div>
-              ))}
-            </div>
+              );
+
+              return (
+                <div className="space-y-6">
+                  {notCompleted.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                        Ikke udført
+                      </h3>
+                      <div className="space-y-2">
+                        {notCompleted.map(renderExerciseRow)}
+                      </div>
+                    </div>
+                  )}
+
+                  {DAYS_ORDER.map(day => (
+                    byDay[day].length > 0 && (
+                      <div key={day}>
+                        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                          {day}
+                        </h3>
+                        <div className="space-y-2">
+                          {byDay[day].map(renderExerciseRow)}
+                        </div>
+                      </div>
+                    )
+                  ))}
+                </div>
+              );
+            })()
           )}
         </div>
 
