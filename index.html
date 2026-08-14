@@ -166,6 +166,17 @@
     text-decoration-color: var(--accent-dim);
   }
 
+  /* ── DAY GROUP HEADER ── */
+  .day-header {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 10px 0 -2px;
+  }
+  .day-header:first-child { margin-top: 0; }
+
   /* ── MEAL CARD ── */
   .meal-card {
     background: var(--bg-card);
@@ -508,6 +519,13 @@
     return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   }
 
+  const DAY_ORDER = ['Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag','Søndag'];
+  function getWeekdayName(date) {
+    const jsDay = date.getDay(); // 0 = søndag
+    const idx = jsDay === 0 ? 6 : jsDay - 1;
+    return DAY_ORDER[idx];
+  }
+
   function formatDayLabel(dateId) {
     const [y, m, d] = dateId.split('-').map(Number);
     const date = new Date(y, m-1, d);
@@ -529,7 +547,7 @@
     if (!raw || !Array.isArray(raw.exercises)) raw = { exercises: [], currentWeek: getISOWeekId(new Date()) };
     const thisWeek = getISOWeekId(new Date());
     if (raw.currentWeek !== thisWeek) {
-      raw.exercises.forEach(ex => ex.done = false);
+      raw.exercises.forEach(ex => { ex.done = false; ex.day = null; });
       raw.currentWeek = thisWeek;
       saveTraining(raw);
     }
@@ -572,14 +590,26 @@
       empty.style.display = 'block';
     } else {
       empty.style.display = 'none';
-      training.exercises.forEach(ex => {
+
+      const collator = new Intl.Collator('da');
+      const byName = (a, b) => collator.compare(a.name, b.name);
+
+      const renderRow = (ex) => {
         const item = document.createElement('div');
         item.className = 'exercise' + (ex.done ? ' done' : '');
 
         const cb = document.createElement('button');
         cb.className = 'checkbox';
         cb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#1a1408" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-        cb.addEventListener('click', () => { const e = training.exercises.find(e => e.id === ex.id); if(e){ e.done = !e.done; saveTraining(training); renderTraining(); }});
+        cb.addEventListener('click', () => {
+          const e = training.exercises.find(e => e.id === ex.id);
+          if (e) {
+            e.done = !e.done;
+            e.day = e.done ? getWeekdayName(new Date()) : null;
+            saveTraining(training);
+            renderTraining();
+          }
+        });
 
         const name = document.createElement('div');
         name.className = 'exercise-name';
@@ -591,7 +621,28 @@
         rm.addEventListener('click', () => { training.exercises = training.exercises.filter(e => e.id !== ex.id); saveTraining(training); renderTraining(); });
 
         item.appendChild(cb); item.appendChild(name); item.appendChild(rm);
-        list.appendChild(item);
+        return item;
+      };
+
+      // Ikke udførte øvelser, sorteret alfabetisk
+      training.exercises.filter(ex => !ex.done).sort(byName).forEach(ex => list.appendChild(renderRow(ex)));
+
+      // Udførte øvelser, grupperet pr. ugedag, alfabetisk inden for hver dag
+      const byDay = {};
+      DAY_ORDER.forEach(d => byDay[d] = []);
+      training.exercises.filter(ex => ex.done).forEach(ex => {
+        const day = (ex.day && byDay[ex.day]) ? ex.day : DAY_ORDER[0];
+        byDay[day].push(ex);
+      });
+      DAY_ORDER.forEach(day => {
+        if (byDay[day].length > 0) {
+          byDay[day].sort(byName);
+          const header = document.createElement('div');
+          header.className = 'day-header';
+          header.textContent = day;
+          list.appendChild(header);
+          byDay[day].forEach(ex => list.appendChild(renderRow(ex)));
+        }
       });
     }
     const total = training.exercises.length;
@@ -907,4 +958,4 @@
   renderWeight();
 </script>
 </body>
-</html>
+                                           </html>
